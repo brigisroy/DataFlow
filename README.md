@@ -86,6 +86,10 @@ Ensure that the environment variables in the Makefile and docker-compose.yml are
 
 The goose command should be available in your PATH. If it isn't, ensure you install it or add the correct path to the Makefile.
 
+if need to generate the csv file run this python file 
+> python py/generated_sample.py
+
+
 Troubleshooting
 
 goose not recognized: Ensure you have Go installed and that your ``GOPATH/bin`` is included in your ```$PATH```.
