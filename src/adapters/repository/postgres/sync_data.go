@@ -19,13 +19,13 @@ func NewSyncDataRepository(dbPool *pgxpool.Pool) ports.SyncDataRepository {
 	}
 }
 
-func (sdr *SyncDataRepository) InsertOrUpdateOrderData(data domain.OrderData) error {
+func (sdr *SyncDataRepository) InsertOrUpdateOrderData(ctx context.Context, data domain.OrderData) error {
 	// Begin Transaction
-	tx, err := sdr.dbPool.Begin(context.Background())
+	tx, err := sdr.dbPool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %v", err)
 	}
-	defer tx.Rollback(context.Background()) // rollback in case of error
+	defer tx.Rollback(ctx) // rollback in case of error
 
 	// Insert or else Update into Order Table
 	orderQuery := `
@@ -41,7 +41,7 @@ func (sdr *SyncDataRepository) InsertOrUpdateOrderData(data domain.OrderData) er
 			updated_at = NOW();`
 
 	_, err = tx.Exec(
-		context.Background(), orderQuery, data.OrderID, data.DateOfSale, data.Region, data.Discount, data.ShippingCost,
+		ctx, orderQuery, data.OrderID, data.DateOfSale, data.Region, data.Discount, data.ShippingCost,
 		data.PaymentMethod,
 	)
 	if err != nil {
@@ -60,7 +60,7 @@ func (sdr *SyncDataRepository) InsertOrUpdateOrderData(data domain.OrderData) er
 			updated_at = NOW();`
 
 	_, err = tx.Exec(
-		context.Background(), productQuery, data.ProductID, data.UnitPrice, data.ProductName, data.Category,
+		ctx, productQuery, data.ProductID, data.UnitPrice, data.ProductName, data.Category,
 	)
 	if err != nil {
 		return fmt.Errorf("error upserting product %s: %v", data.ProductID, err)
@@ -78,7 +78,7 @@ func (sdr *SyncDataRepository) InsertOrUpdateOrderData(data domain.OrderData) er
 			updated_at = NOW();`
 
 	_, err = tx.Exec(
-		context.Background(), customerQuery, data.CustomerID, data.CustomerName, data.CustomerEmail,
+		ctx, customerQuery, data.CustomerID, data.CustomerName, data.CustomerEmail,
 		data.CustomerAddress,
 	)
 	if err != nil {
@@ -95,14 +95,14 @@ func (sdr *SyncDataRepository) InsertOrUpdateOrderData(data domain.OrderData) er
 			updated_at = NOW();`
 
 	_, err = tx.Exec(
-		context.Background(), orderMappingQuery, data.OrderID, data.ProductID, data.CustomerID, data.QuantitySold,
+		ctx, orderMappingQuery, data.OrderID, data.ProductID, data.CustomerID, data.QuantitySold,
 	)
 	if err != nil {
 		return fmt.Errorf("error upserting order mapping for order %s: %v", data.OrderID, err)
 	}
 
 	// Commit the transaction
-	if err := tx.Commit(context.Background()); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("failed to commit transaction: %v", err)
 	}
 	// return nil if now error

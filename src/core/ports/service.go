@@ -1,5 +1,7 @@
 package ports
 
+import "context"
+
 type SyncDataService interface {
-	SyncData()
+	SyncData(context.Context)
 }

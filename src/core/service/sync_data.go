@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/csv"
 	"log"
 	"os"
@@ -30,7 +31,7 @@ func NewSyncDataService(filename string, sdr ports.SyncDataRepository) ports.Syn
 	}
 }
 
-func (sds *syncDataService) SyncData() {
+func (sds *syncDataService) SyncData(ctx context.Context) {
 	// Open the CSV file
 	file, err := os.Open(sds.filename)
 	if err != nil {
@@ -77,7 +78,7 @@ func (sds *syncDataService) SyncData() {
 		}
 
 		// Insert or update the data
-		err = sds.syncDataRepo.InsertOrUpdateOrderData(order)
+		err = sds.syncDataRepo.InsertOrUpdateOrderData(ctx, order)
 		if err != nil {
 			log.Println(err)
 		}

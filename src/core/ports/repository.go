@@ -1,7 +1,10 @@
 package ports
 
-import "sample.code/dataflow/src/core/domain"
+import (
+	"golang.org/x/net/context"
+	"sample.code/dataflow/src/core/domain"
+)
 
 type SyncDataRepository interface {
-	InsertOrUpdateOrderData(data domain.OrderData) error
+	InsertOrUpdateOrderData(context.Context, domain.OrderData) error
 }
