@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=admin # Username for PostgreSQL
+      - POSTGRES_PASSWORD=root # Password for the user
+      - POSTGRES_DB=dataflow # Default database to create
+    networks:
+      - pg_local
+
+networks:
+  pg_local:
+    driver: bridge
