@@ -1,11 +1,14 @@
 package service
 
 import (
+	"encoding/csv"
 	"log"
-	"time"
+	"os"
 
+	"github.com/go-playground/validator/v10"
 	"sample.code/dataflow/src/core/domain"
 	"sample.code/dataflow/src/core/ports"
+	"sample.code/dataflow/src/core/util"
 )
 
 type syncDataService struct {
@@ -13,7 +16,14 @@ type syncDataService struct {
 	syncDataRepo ports.SyncDataRepository
 }
 
+var validate *validator.Validate
+
 func NewSyncDataService(filename string, sdr ports.SyncDataRepository) ports.SyncDataService {
+	if validate == nil {
+		validate = validator.New()
+		validate.RegisterValidation("valid_date", util.IsValidDate)
+	}
+
 	return &syncDataService{
 		filename:     filename,
 		syncDataRepo: sdr,
@@ -21,27 +31,55 @@ func NewSyncDataService(filename string, sdr ports.SyncDataRepository) ports.Syn
 }
 
 func (sds *syncDataService) SyncData() {
-	orderData := domain.OrderData{
-		OrderID:         123,
-		ProductID:       1,
-		CustomerID:      34,
-		ProductName:     "Product A",
-		Category:        "Category 1",
-		Region:          "Region 1",
-		DateOfSale:      time.Now(),
-		QuantitySold:    5,
-		UnitPrice:       20.5,
-		Discount:        5.0,
-		ShippingCost:    3.5,
-		PaymentMethod:   "Credit Card",
-		CustomerName:    "John Doe",
-		CustomerEmail:   "john@example.com",
-		CustomerAddress: "123 Main St",
-	}
-
-	err := sds.syncDataRepo.InsertOrUpdateOrderData(orderData)
+	// Open the CSV file
+	file, err := os.Open(sds.filename)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatalf("Could not open file: %v", err)
+	}
+	defer file.Close()
+
+	// Initialize CSV reader
+	reader := csv.NewReader(file)
+	_, err = reader.Read() // Skip header row
+	if err != nil {
+		log.Fatalf("Error reading header: %v", err)
+	}
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break // End of file
+		}
+
+		// Map the CSV record to OrderData
+		order := domain.OrderData{
+			OrderID:         record[0],
+			ProductID:       record[1],
+			CustomerID:      record[2],
+			ProductName:     record[3],
+			Category:        record[4],
+			Region:          record[5],
+			DateOfSale:      util.ParseDate(record[6]),
+			QuantitySold:    util.Atoi(record[7]),
+			UnitPrice:       util.Atof(record[8]),
+			Discount:        util.Atof(record[9]),
+			ShippingCost:    util.Atof(record[10]),
+			PaymentMethod:   record[11],
+			CustomerName:    record[12],
+			CustomerEmail:   record[13],
+			CustomerAddress: record[14],
+		}
+
+		// Validate the order
+		err = validate.Struct(order)
+		if err != nil {
+			log.Printf("Validation failed for OrderID %s: %v", order.OrderID, err)
+			continue
+		}
+
+		// Insert or update the data
+		err = sds.syncDataRepo.InsertOrUpdateOrderData(order)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
