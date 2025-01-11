@@ -13,6 +13,7 @@ var App AppConfig
 type AppConfig struct {
 	DatabaseURL  string
 	DataFilePath string
+	Port         string
 }
 
 func init() {
@@ -30,6 +31,7 @@ func loadConfig() {
 	configMap := map[string]*string{
 		"DATABASE_URL":   &App.DatabaseURL,
 		"DATA_FILE_PATH": &App.DataFilePath,
+		"PORT":           &App.Port,
 	}
 
 	err := godotenv.Load(".env")

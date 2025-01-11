@@ -3,6 +3,6 @@ package domain
 import "time"
 
 type DateRangeRequest struct {
-	StartDate time.Time `json:"start_date" binding:"required"`
-	EndDate   time.Time `json:"end_date" binding:"required"`
+	StartDate time.Time `json:"startDate" binding:"required"`
+	EndDate   time.Time `json:"endDate" binding:"required,gtfield=StartDate"`
 }

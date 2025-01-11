@@ -1,31 +1,23 @@
 package domain
 
 type Revenue struct {
-	TotalRevenue float64 `json:"total_revenue"`
+	TotalRevenue           float64           `json:"totalRevenue"`
+	TotalRevenueByProduct  []ProductRevenue  `json:"product"`
+	TotalRevenueByCategory []CategoryRevenue `json:"category"`
+	TotalRevenueByRegion   []RegionRevenue   `json:"region"`
 }
 
 type ProductRevenue struct {
-	ProductName  string  `json:"product_name"`
-	TotalRevenue float64 `json:"total_revenue"`
+	ProductName  string  `json:"product"`
+	TotalRevenue float64 `json:"revenue"`
 }
 
 type CategoryRevenue struct {
 	Category     string  `json:"category"`
-	TotalRevenue float64 `json:"total_revenue"`
+	TotalRevenue float64 `json:"revenue"`
 }
 
 type RegionRevenue struct {
 	Region       string  `json:"region"`
-	TotalRevenue float64 `json:"total_revenue"`
-}
-
-type TopProducts struct {
-	ProductName string `json:"product_name"`
-	TotalSold   int    `json:"total_sold"`
-}
-
-type CustomerAnalysis struct {
-	TotalCustomers int     `json:"total_customers"`
-	TotalOrders    int     `json:"total_orders"`
-	AvgOrderValue  float64 `json:"avg_order_value"`
+	TotalRevenue float64 `json:"revenue"`
 }
