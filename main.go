@@ -47,7 +47,6 @@ func main() {
 		fmt.Println("30 minutes elapsed. Syncing data...")
 		syncDataService.SyncData(ctx) // Trigger your sync process here
 	}
-	_ = syncDataService
 	e := echo.New()
 
 	// Register the route
